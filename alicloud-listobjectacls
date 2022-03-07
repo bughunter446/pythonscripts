@@ -1,0 +1,4 @@
+# List Bucket and Object ACls - CIS 5.2
+# Object ACL : ['default', 'public-read-write', 'public-read', 'private']
+# default = 	Inherited from the bucket
+for line in $(head -n -3 ./oss-list-buckets.txt | tail -n +2); do { region=$(echo $line |  grep -o 'oss-[0-9a-zA-Z\-]*' ); bucket=$(echo $line |  grep -o oss://.*$ | cut -d '/' -f 3); endpoint=https://$region.aliyuncs.com; echo $region,$bucket,$endpoint;python3 -c "import oss2,sys; auth = oss2.Auth(sys.argv[1], sys.argv[2]); bucket = oss2.Bucket(auth, sys.argv[3], sys.argv[4]); print('Bucket ACL: '+bucket.get_bucket_acl().acl+'    Bucket: ' +sys.argv[3]); [ print('ACL: '+bucket.get_object_acl(obj.key).acl + '    Object: '+obj.key) for obj in oss2.ObjectIteratorV2(bucket)] " $accesskeyid $accesskeysecret $endpoint $bucket; }; done | tee -a oss-bucket-object-acls.txt
